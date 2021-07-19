@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.19)
+project(common_algorithms)
+
+set(CMAKE_CXX_STANDARD 11)
+
+add_executable(common-algorithms main.cpp)
+add_subdirectory(sorting)
