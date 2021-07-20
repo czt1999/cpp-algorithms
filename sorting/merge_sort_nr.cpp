@@ -3,7 +3,6 @@
 //
 
 #include <array>
-#include <algorithm>
 #include "base.cpp"
 
 namespace sorting {

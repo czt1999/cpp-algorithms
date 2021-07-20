@@ -22,11 +22,22 @@ namespace sorting {
          * @tparam N size of the array
          */
         template<size_t N>
-        void showArray(std::array<int64_t, N> arr) {
+        void showArray(std::array<int64_t, N> &arr) {
             for (int64_t e : arr) {
                 std::cout << e << " ";
             }
             std::cout << "\n";
+        }
+
+        template<size_t N>
+        int64_t max(std::array<int64_t, N> &arr) {
+            int64_t mx = INT64_MIN;
+            for (int64_t a : arr) {
+                if (mx < a) {
+                    mx = a;
+                }
+            }
+            return mx;
         }
 
         /**
@@ -43,12 +54,11 @@ namespace sorting {
             auto seed = std::chrono::steady_clock::now().time_since_epoch().count();
             std::default_random_engine e(seed);
             std::uniform_int_distribution<int64_t> u(from, to);
-            std::array<int64_t, N> randomArray;
-            int64_t i = 0;
-            while (i < N) {
-                randomArray[i++] = u(e);
+            std::array<int64_t, N> random_arr;
+            for (int i = 0; i < N; ++i) {
+                random_arr[i] = u(e);
             }
-            return randomArray;
+            return random_arr;
         }
 
     } // namespace base
