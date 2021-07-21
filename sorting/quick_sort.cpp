@@ -9,11 +9,7 @@ namespace sorting {
     namespace quick_sort {
 
         /**
-         * @brief
-         * @param arr
-         * @param low
-         * @param high
-         * @return final position of the pivot element
+         * @brief 快速排序，以最左边的元素为基准（pivot）
          */
         template<size_t N>
         int64_t partition(std::array<int64_t, N> &arr, int low, int high) {
@@ -21,8 +17,11 @@ namespace sorting {
             int l = low, h = high;
             while (l < h) {
                 while (l < h && arr[h] >= pivot) { h--; }
+                // 将小于pivot的元素移到arr[l]
+                // 这里不用考虑arr[h]，它在接下来的迭代中会被覆盖
                 arr[l] = arr[h];
                 while (l < h && arr[l] <= pivot) { l++; }
+                // 同上
                 arr[h] = arr[l];
             }
             arr[l] = pivot;

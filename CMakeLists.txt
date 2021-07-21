@@ -4,3 +4,4 @@ project(common_algorithms)
 set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(sorting)
+add_subdirectory(data_structure)

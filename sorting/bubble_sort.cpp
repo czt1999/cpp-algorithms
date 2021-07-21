@@ -12,6 +12,7 @@ namespace sorting {
         template<size_t N>
         void bubbleSort(std::array<int64_t, N> &arr) {
             bool swap_check = true;
+            // 若一轮遍历中没有发生交换，说明已经排好序，可以（提前）结束
             for (int j = N - 1; j > 0 && swap_check; --j) {
                 swap_check = false;
                 for (int i = 0; i < j; ++i) {

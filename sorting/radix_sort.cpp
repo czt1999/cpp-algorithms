@@ -3,7 +3,6 @@
 //
 
 #include <array>
-#include <vector>
 #include <queue>
 #include "base.cpp"
 
@@ -27,10 +26,12 @@ namespace sorting {
             std::queue<int64_t> buckets[10];
             for (int64_t mx = base::max(arr); mx > 0; mx /= 10, ++n);
             for (int k = 1; k <= n; ++k) {
+                // 数组 => 桶中的队列
                 for (int64_t a : arr) {
                     buckets[numAt(a, k)].push(a);
                 }
                 int i = 0;
+                // 桶中的队列 => 数组
                 for (auto &bucket : buckets) {
                     while (!bucket.empty()) {
                         arr[i++] = bucket.front();

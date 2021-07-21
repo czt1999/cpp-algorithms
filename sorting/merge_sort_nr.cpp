@@ -8,7 +8,7 @@
 namespace sorting {
 
     /**
-     * non-recursive merge sorting
+     * 非递归形式的归并排序
      */
     namespace merge_sort_nr {
 
