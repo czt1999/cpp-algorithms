@@ -10,11 +10,11 @@ foreach( sourcefile ${APP_SOURCES} )
     add_executable( ${name} ${sourcefile} )
 
     set_target_properties(${name} PROPERTIES
-        LINKER_LANGUAGE CXX
-        CXX_STANDARD 17)
+            LINKER_LANGUAGE CXX
+            CXX_STANDARD 17)
     if(OpenMP_CXX_FOUND)
         target_link_libraries(${name} OpenMP::OpenMP_CXX)
     endif()
-    install(TARGETS ${name} DESTINATION "bin/sorting")
+    install(TARGETS ${name} DESTINATION "bin/graph")
 
 endforeach( sourcefile ${APP_SOURCES} )
