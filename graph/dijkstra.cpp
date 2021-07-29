@@ -18,7 +18,7 @@ namespace graph {
         template<size_t V>
         int *dijkstra(const int g[V][V], int src) {
             // 记录当前最短路径
-            int *distance = (int *) malloc(sizeof(int) * V);
+            int *distance = new int[V];
             memcpy(distance, g[src], sizeof(int) * V);
             // 已确定最短路径的点集
             bool visited[V];
@@ -85,5 +85,5 @@ int main(int argc, char *argv[]) {
         std::cout << "A到" << (char) ('A' + i) << "的最短距离为"
                   << distance[i] << std::endl;
     }
-    delete distance;
+    free(distance);
 }
