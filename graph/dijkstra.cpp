@@ -59,26 +59,26 @@ namespace graph {
 int main(int argc, char *argv[]) {
     /*
      *           5           3
-     *     A -------- B ---------- E
-     *      \       /   \         /
-     *     9 \    / 2   1 \     / 1
-     *        \ /     8     \ /
-     *         C ----------- D ------- F
-     *          \          /     5    /
-     *       12  \    ---- 2        / 1
-     *            \ /             /
-     *             G ----------- H
+     *     A -------- B ---------- E -------
+     *      \       /   \         /         |
+     *     9 \    / 2   1 \     / 1         |
+     *        \ /     8     \ /             |
+     *         C ----------- D ------- F    | 4
+     *          \          /     5    /     |
+     *       12  \    ---- 2        / 1     |
+     *            \ /             /         |
+     *             G ----------- H ---------
      *                     3
      * */
     int graph[8][8] = {
             {0,   5,   9,   INF, INF, INF, INF, INF},
-            {5,   0,   2,   1, 3,     INF, INF, INF},
+            {5,   0,   2,   1,   3,   INF, INF, INF},
             {9,   2,   0,   8,   INF, INF, 12,  INF},
-            {INF, 1,   8,   0, 1,     5,   2,   INF},
-            {INF, 3,   INF, 1, 0,     INF, INF, INF},
+            {INF, 1,   8,   0,   1,   5,   2,   INF},
+            {INF, 3,   INF, 1,   0,   INF, INF, 4},
             {INF, INF, INF, 5,   INF, 0,   INF, 1},
             {INF, INF, 12,  2,   INF, INF, 0,   3},
-            {INF, INF, INF, INF, INF, 1,   3,   0}
+            {INF, INF, INF, INF, 4,   1,   3,   0}
     };
     int *distance = graph::dijkstra::dijkstra(graph, 0);
     for (int i = 1; i < 8; ++i) {
