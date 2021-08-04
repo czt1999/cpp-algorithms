@@ -85,5 +85,5 @@ int main(int argc, char *argv[]) {
         std::cout << "A到" << (char) ('A' + i) << "的最短距离为"
                   << distance[i] << std::endl;
     }
-    free(distance);
+    delete[] distance;
 }
