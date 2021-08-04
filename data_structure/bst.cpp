@@ -142,6 +142,7 @@ int main(int argc, char *argv[]) {
      *    /     \
      *   1       5
      */
+    cout << "======= Order 1 ========" << endl;
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(2): " << bst.remove(2) << endl;
     cout << "depth(): " << bst.depth() << endl;
@@ -152,5 +153,20 @@ int main(int argc, char *argv[]) {
     cout << "remove(5): " << bst.remove(5) << endl;
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(3): " << bst.remove(3) << endl;
+    cout << "depth(): " << bst.depth() << endl;
+    bst.add(2, "2");
+    bst.add(1, "1");
+    bst.add(3, "3");
+    bst.add(4, "4");
+    bst.add(5, "5");
+    /*      2
+     *     / \
+     *    1   3
+     *         \
+     *          4
+     *           \
+     *            5
+     */
+    cout << "======= Order 2 ========" << endl;
     cout << "depth(): " << bst.depth() << endl;
 }
