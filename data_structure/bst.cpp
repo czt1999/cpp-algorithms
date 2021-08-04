@@ -56,12 +56,12 @@ namespace data_structure {
         }
 
         int BST::depth(BiNode node) {
-            return node == nullptr ? 0 : max(depth(node->left), depth(node->right)) + 1;
+            return node ? max(depth(node->left), depth(node->right)) + 1 : 0;
         }
 
         pair<BiNode, BiNode> BST::search(int key) {
             BiNode par = nullptr, tar = root;
-            while (tar != nullptr && tar->key != key) {
+            while (tar && tar->key != key) {
                 par = tar;
                 tar = (tar->key < key) ? tar->right : tar->left;
             }
@@ -70,15 +70,15 @@ namespace data_structure {
 
         string BST::get(int key) {
             pair<BiNode, BiNode> s = search(key);
-            return s.second == nullptr ? "" : s.second->val;
+            return s.second ? s.second->val : "";
         }
 
         string BST::add(int key, const string &val) {
             pair<BiNode, BiNode> s = search(key);
-            auto ret = s.second == nullptr ? "" : s.second->val;
-            if (s.second == nullptr) {
+            auto ret = s.second ? s.second->val : "";
+            if (!s.second) {
                 auto n = new Node{key, val};
-                if (s.first == nullptr) {
+                if (!s.first) {
                     root = n;
                 } else if (s.first->key < key) {
                     s.first->right = n;
@@ -91,26 +91,26 @@ namespace data_structure {
 
         string BST::remove(int key) {
             pair<BiNode, BiNode> s = search(key);
-            auto ret = s.second == nullptr ? "" : s.second->val;
-            if (s.second != nullptr) {
+            auto ret = s.second ? s.second->val : "";
+            if (s.second) {
                 BiNode rpl;
-                if (s.second->left == nullptr) {
-                    // 被移除的节点没有左子树，用右子树替代它
-                    rpl = s.second->right;
-                } else {
+                if (s.second->left) {
                     // 用左子树最右端的节点（lr）替代原节点
                     BiNode rpl_parent;
-                    for (rpl = s.second->left; rpl->right != nullptr; rpl = rpl->right, rpl_parent = rpl) {}
+                    for (rpl = s.second->left; rpl->right; rpl = rpl->right, rpl_parent = rpl) {}
                     rpl->right = s.second->right;
                     if (rpl != s.second->left) {
                         rpl->left = s.second->left;
                         rpl_parent->right = nullptr;
                     }
+                } else {
+                    // 被移除的节点没有左子树，用右子树替代它
+                    rpl = s.second->right;
                 }
                 // 释放原节点的空间
                 delete s.second;
                 // 将替代节点链接到原先的父节点
-                if (s.first == nullptr) {
+                if (!s.first) {
                     // 被移除的是根节点
                     root = rpl;
                 } else if (s.first->left == s.second) {
