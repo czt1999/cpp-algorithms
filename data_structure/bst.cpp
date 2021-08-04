@@ -76,7 +76,9 @@ namespace data_structure {
         string BST::add(int key, const string &val) {
             pair<BiNode, BiNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
-            if (!s.second) {
+            if (s.second) {
+                s.second->val = val;
+            } else {
                 auto n = new Node{key, val};
                 if (!s.first) {
                     root = n;
@@ -95,13 +97,13 @@ namespace data_structure {
             if (s.second) {
                 BiNode rpl;
                 if (s.second->left) {
-                    // 用左子树最右端的节点（lr）替代原节点
+                    // 用左子树最右端的节点替代原节点
                     BiNode rpl_parent;
-                    for (rpl = s.second->left; rpl->right; rpl = rpl->right, rpl_parent = rpl) {}
+                    for (rpl = s.second->left; rpl->right; rpl_parent = rpl, rpl = rpl->right) {}
                     rpl->right = s.second->right;
                     if (rpl != s.second->left) {
+                        rpl_parent->right = rpl->left;
                         rpl->left = s.second->left;
-                        rpl_parent->right = nullptr;
                     }
                 } else {
                     // 被移除的节点没有左子树，用右子树替代它
@@ -127,18 +129,18 @@ namespace data_structure {
 
 int main(int argc, char *argv[]) {
     data_structure::binary_search_tree::BST bst{};
-    bst.add(3, "3");
-    bst.add(2, "2");
-    bst.add(1, "1");
-    bst.add(4, "4");
-    bst.add(5, "5");
+    cout << "======= Order 1 ========" << endl;
     /*       3
      *      / \
      *     2   4
      *    /     \
      *   1       5
      */
-    cout << "======= Order 1 ========" << endl;
+    bst.add(3, "3");
+    bst.add(2, "2");
+    bst.add(1, "1");
+    bst.add(4, "4");
+    bst.add(5, "5");
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(2): " << bst.remove(2) << endl;
     cout << "depth(): " << bst.depth() << endl;
@@ -150,11 +152,8 @@ int main(int argc, char *argv[]) {
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(3): " << bst.remove(3) << endl;
     cout << "depth(): " << bst.depth() << endl;
-    bst.add(2, "2");
-    bst.add(1, "1");
-    bst.add(3, "3");
-    bst.add(4, "4");
-    bst.add(5, "5");
+
+    cout << "======= Order 2 ========" << endl;
     /*      2
      *     / \
      *    1   3
@@ -163,6 +162,37 @@ int main(int argc, char *argv[]) {
      *           \
      *            5
      */
-    cout << "======= Order 2 ========" << endl;
+    bst.add(2, "2");
+    bst.add(1, "1");
+    bst.add(3, "3");
+    bst.add(4, "4");
+    bst.add(5, "5");
+    cout << "remove(3): " << bst.remove(3) << endl;
+    cout << "depth(): " << bst.depth() << endl;
+    cout << "remove(2): " << bst.remove(2) << endl;
+    cout << "depth(): " << bst.depth() << endl;
+    cout << "remove(4): " << bst.remove(4) << endl;
+    cout << "depth(): " << bst.depth() << endl;
+    cout << "remove(5): " << bst.remove(5) << endl;
+    cout << "depth(): " << bst.depth() << endl;
+    cout << "remove(1): " << bst.remove(1) << endl;
+    cout << "depth(): " << bst.depth() << endl;
+
+    cout << "======= Order 3 ========" << endl;
+    /*
+     *       4
+     *      /
+     *     1
+     *      \
+     *       3
+     *      /
+     *     2
+     * */
+    bst.add(4, "4");
+    bst.add(1, "1");
+    bst.add(3, "3");
+    bst.add(2, "2");
+    cout << "depth(): " << bst.depth() << endl;
+    cout << "remove(4): " << bst.remove(4) << endl;
     cout << "depth(): " << bst.depth() << endl;
 }
