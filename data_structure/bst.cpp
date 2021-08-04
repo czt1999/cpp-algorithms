@@ -12,11 +12,11 @@ namespace data_structure {
 
     namespace binary_search_tree {
 
-        typedef struct node {
-            int key;
+        typedef struct Node {
+            int key{};
             string val;
-            struct node *left;
-            struct node *right;
+            struct Node *left{};
+            struct Node *right{};
         } *BiNode;
 
         /**
@@ -77,11 +77,7 @@ namespace data_structure {
             pair<BiNode, BiNode> s = search(key);
             auto ret = s.second == nullptr ? "" : s.second->val;
             if (s.second == nullptr) {
-                auto n = static_cast<BiNode>(malloc(sizeof(struct node)));
-                n->key = key;
-                n->val = val;
-                n->left = nullptr;
-                n->right = nullptr;
+                auto n = new Node{key, val};
                 if (s.first == nullptr) {
                     root = n;
                 } else if (s.first->key < key) {
