@@ -13,10 +13,10 @@ namespace data_structure {
     namespace binary_search_tree {
 
         typedef struct Node {
-            int key{};
+            int key;
             string val;
-            struct Node *left{};
-            struct Node *right{};
+            struct Node *left;
+            struct Node *right;
         } *BiNode;
 
         /**
@@ -38,7 +38,7 @@ namespace data_structure {
             string get(int key);
 
             // 添加/更新
-            string add(int key, const string &val);
+            string put(int key, const string &val);
 
             // 删除
             string remove(int key);
@@ -73,7 +73,7 @@ namespace data_structure {
             return s.second ? s.second->val : "";
         }
 
-        string BST::add(int key, const string &val) {
+        string BST::put(int key, const string &val) {
             pair<BiNode, BiNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             if (s.second) {
@@ -136,11 +136,11 @@ int main(int argc, char *argv[]) {
      *    /     \
      *   1       5
      */
-    bst.add(3, "3");
-    bst.add(2, "2");
-    bst.add(1, "1");
-    bst.add(4, "4");
-    bst.add(5, "5");
+    bst.put(3, "3");
+    bst.put(2, "2");
+    bst.put(1, "1");
+    bst.put(4, "4");
+    bst.put(5, "5");
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(2): " << bst.remove(2) << endl;
     cout << "depth(): " << bst.depth() << endl;
@@ -162,11 +162,11 @@ int main(int argc, char *argv[]) {
      *           \
      *            5
      */
-    bst.add(2, "2");
-    bst.add(1, "1");
-    bst.add(3, "3");
-    bst.add(4, "4");
-    bst.add(5, "5");
+    bst.put(2, "2");
+    bst.put(1, "1");
+    bst.put(3, "3");
+    bst.put(4, "4");
+    bst.put(5, "5");
     cout << "remove(3): " << bst.remove(3) << endl;
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(2): " << bst.remove(2) << endl;
@@ -188,10 +188,10 @@ int main(int argc, char *argv[]) {
      *      /
      *     2
      * */
-    bst.add(4, "4");
-    bst.add(1, "1");
-    bst.add(3, "3");
-    bst.add(2, "2");
+    bst.put(4, "4");
+    bst.put(1, "1");
+    bst.put(3, "3");
+    bst.put(2, "2");
     cout << "depth(): " << bst.depth() << endl;
     cout << "remove(4): " << bst.remove(4) << endl;
     cout << "depth(): " << bst.depth() << endl;
