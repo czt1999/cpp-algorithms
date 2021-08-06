@@ -11,11 +11,11 @@ namespace data_structure {
     namespace avl_tree {
 
         typedef struct Node {
-            int key{};
+            int key;
             string val;
-            struct Node *left{};
-            struct Node *right{};
-            struct Node *parent{};
+            struct Node *left;
+            struct Node *right;
+            struct Node *parent;
             int depth{1};
         } *AvlNode;
 
@@ -54,7 +54,7 @@ namespace data_structure {
             string get(int key);
 
             // 添加/更新
-            string add(int key, const string &val);
+            string put(int key, const string &val);
 
             // 删除
             string remove(int key);
@@ -111,7 +111,7 @@ namespace data_structure {
             return s.second ? s.second->val : "";
         }
 
-        string AVL::add(int key, const string &val) {
+        string AVL::put(int key, const string &val) {
             pair<AvlNode, AvlNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             if (s.second) {
@@ -144,7 +144,7 @@ namespace data_structure {
             if (s.second) {
                 AvlNode rpl, last_effected; // 记录受影响的最底部节点
                 if (s.second->left) {
-                    // 用左子树最右端的节点（lr）替代原节点
+                    // 用左子树最右端的节点替代原节点
                     AvlNode rpl_parent;
                     for (rpl = s.second->left; rpl->right; rpl_parent = rpl, rpl = rpl->right) {}
                     pointRight(rpl, s.second->right);
@@ -282,11 +282,11 @@ namespace data_structure {
 int main(int argc, char *argv[]) {
     data_structure::avl_tree::AVL avl{};
     cout << "======= Order 1 ========" << endl;
-    avl.add(1, "1");
-    avl.add(2, "2");
-    avl.add(3, "3");
-    avl.add(4, "4");
-    avl.add(5, "5");
+    avl.put(1, "1");
+    avl.put(2, "2");
+    avl.put(3, "3");
+    avl.put(4, "4");
+    avl.put(5, "5");
     /*       2
      *      / \
      *     1   4
