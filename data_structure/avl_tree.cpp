@@ -145,13 +145,12 @@ namespace data_structure {
                 AvlNode rpl, last_effected; // 记录受影响的最底部节点
                 if (s.second->left) {
                     // 用左子树最右端的节点替代原节点
-                    AvlNode rpl_parent;
-                    for (rpl = s.second->left; rpl->right; rpl_parent = rpl, rpl = rpl->right) {}
+                    for (rpl = s.second->left; rpl->right; rpl = rpl->right) {}
                     pointRight(rpl, s.second->right);
                     if (rpl != s.second->left) {
-                        pointRight(rpl_parent, rpl->left);
+                        pointRight(rpl->parent, rpl->left);
                         pointLeft(rpl, s.second->left);
-                        last_effected = rpl_parent;
+                        last_effected = rpl->parent;
                     } else {
                         last_effected = rpl;
                     }
@@ -166,7 +165,9 @@ namespace data_structure {
                 if (!s.first) {
                     // 被移除的是根节点
                     root = rpl;
-                    rpl->parent = nullptr;
+                    if (root) {
+                        root->parent = nullptr;
+                    }
                 } else if (s.first->left == s.second) {
                     pointLeft(s.first, rpl);
                 } else {
