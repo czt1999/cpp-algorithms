@@ -43,6 +43,8 @@ namespace data_structure {
             // 搜索由key指定的节点
             pair<RbNode, RbNode> search(int key);
 
+            static bool isRed(RbNode node);
+
             // 改变指定节点的颜色
             static void flipColor(RbNode node);
 
@@ -52,6 +54,8 @@ namespace data_structure {
 
             static void pointRight(RbNode parent, RbNode child);
 
+            static void unlinkAndDelete(RbNode node);
+
             // 左旋（让右子节点替代原节点的位置）
             void rotateLeft(RbNode node);
 
@@ -60,6 +64,13 @@ namespace data_structure {
 
             // 根据红黑树的特性调整
             void adjust(RbNode node);
+
+            // 移除指定节点
+            RbNode remove(RbNode node, int key);
+
+            RbNode removeMin(RbNode node);
+
+            RbNode removeMax(RbNode node);
 
         public:
             // 返回树的高度
@@ -73,6 +84,8 @@ namespace data_structure {
 
             // 删除
             string remove(int key);
+
+            bool isRed(int key);
         };
 
         //
@@ -103,6 +116,22 @@ namespace data_structure {
                     child->parent = parent;
                 }
             }
+        }
+
+        void RbTree::unlinkAndDelete(RbNode node) {
+            if (node) {
+                RbNode parent = node->parent;
+                if (parent && node == parent->left) {
+                    parent->left = nullptr;
+                } else if (parent) {
+                    parent->right = nullptr;
+                }
+                delete node;
+            }
+        }
+
+        bool RbTree::isRed(RbNode node) {
+            return node && (RED == node->color);
         }
 
         void RbTree::flipColor(RbNode node) {
@@ -189,7 +218,7 @@ namespace data_structure {
                         pointLeft(s.first, n);
                     }
                     // 作必要调整
-                    adjust(s.first);
+                    adjust(n);
                 }
             }
             return ret;
@@ -199,56 +228,7 @@ namespace data_structure {
             pair<RbNode, RbNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             if (s.second) {
-                int target_color = s.second->color;
-                RbNode rpl;
-                if (s.second->left) {
-                    if ((rpl = s.second->left->right)) {
-                        // 用左子树最右端的节点替代原节点
-                        RbNode rpl_parent;
-                        while (rpl->right) {
-                            rpl_parent = rpl;
-                            rpl = rpl->right;
-                        }
-                        pointRight(rpl, s.second->right);
-                        if (rpl->left) {
-                            // rpl只能是黑节点，只有一个红色左节点
-                            rpl->left->color = BLACK;
-                        } else {
-                            // rpl只能是红节点，无子节点
-                        }
-                        rpl->color = target_color;
-                        pointRight(rpl_parent, rpl->left);
-                        pointLeft(rpl, s.second->left);
-                    } else {
-                        // 用左子树代替原节点
-                        rpl = s.second->left;
-                        if (rpl->left) {
-                            // rpl只能是黑节点，只有一个红色左节点
-                            rpl->left->color = BLACK;
-                        } else {
-                            // rpl只能是红节点，无子节点
-                        }
-                    }
-                } else {
-                    // 用右子树替代原节点
-                    // rpl只能是红节点，无子节点
-                    rpl = s.second->right;
-                    rpl->color = BLACK;
-                }
-                // 释放原节点的空间
-                delete s.second;
-                // 将替代节点链接到原先的父节点
-                if (!s.first) {
-                    // 被移除的是根节点
-                    root = rpl;
-                    rpl->parent = nullptr;
-                } else if (s.first->left == s.second) {
-                    pointLeft(s.first, rpl);
-                } else {
-                    pointRight(s.first, rpl);
-                }
-                // 作必要调整
-                adjust(rpl);
+                root = remove(root, key);
             }
             return ret;
         }
@@ -308,6 +288,107 @@ namespace data_structure {
             }
         }
 
+        RbNode RbTree::remove(RbNode node, int key) {
+            if (node) {
+                RbNode left = node->left, right = node->right, rpl;
+                if (node->key < key) {
+                    node = remove(left, key);
+                } else if (node->key > key) {
+                    node = remove(right, key);
+                } else { // node->key == key
+                    if (!left && !right) {
+                        if (RED == node->color) {
+                            unlinkAndDelete(node);
+                            return nullptr;
+                        } else { // 删除的是黑色叶子节点
+
+                        }
+                    }
+                    if (left) {
+                        // 原节点有左子树
+                        // 用左子树最右端的节点替代原节点
+                        for (rpl = left; rpl->right; rpl = rpl->right) {}
+                    } else {
+                        // 原节点有右子树
+                        // 用右子树最左端的节点替代原节点
+                        for (rpl = right; rpl->left; rpl = rpl->left) {}
+                    }
+                    node->key = rpl->key;
+                    node->val = rpl->val;
+                    if (left) {
+                        node->left = removeMax(left);
+                    } else {
+                        node->right = removeMin(right);
+                    }
+                }
+            }
+            return node;
+
+//                RbNode left = node->left, right = node->right, rpl;
+//                // 1. 原节点的左子树和右子树均为空
+//                if (!left && !right) {
+//                    RbNode parent = node->parent;
+//                    // 1.1 删除的是根节点
+//                    if (!parent) {
+//                        root = nullptr;
+//                        delete node;
+//                        return;
+//                    }
+//                    // 1.2 红节点直接删除
+//                    if (RED == node->color) {
+//                        unlinkAndDelete(node);
+//                        return;
+//                    }
+//                    bool isLeft = (node == parent->left);
+//                    RbNode sibling = (isLeft ? parent->right : parent->left);
+//                    // 1.3 黑节点且不是根节点
+//                    //     必存在兄弟节点
+//                    if (RED == parent->color) {
+//                        // 1.3.1 父节点是红色
+//                        //       把父节点改为黑色，兄弟节点改为红色
+//                        parent->color = BLACK;
+//                        sibling->color = RED;
+//                        unlinkAndDelete(node);
+//                    } else {
+//                        // 1.3.2 父节点是黑色
+//                        //       需要旋转进行高度的调整
+//                        if (RED == sibling->color) {
+//
+//                        } else {
+//
+//                        }
+//                    }
+//                    return;
+//                }
+//                if (left) {
+//                    // 2. 原节点有左子树
+//                    // 用左子树最右端的节点替代原节点
+//                    for (rpl = left; rpl->right; rpl = rpl->right) {}
+//                } else {
+//                    // 3. 原节点有右子树
+//                    // 用右子树最左端的节点替代原节点
+//                    for (rpl = right; rpl->left; rpl = rpl->left) {}
+//                }
+//                // 把替代节点的key和val转移到原节点
+//                // 节点的连接关系没有改变
+//                node->key = rpl->key;
+//                node->val = rpl->val;
+//                // 递归，移除替代节点
+//                remove(rpl);
+        }
+
+        RbNode RbTree::removeMin(RbNode node) {
+            return nullptr;
+        }
+
+        RbNode RbTree::removeMax(RbNode node) {
+
+        }
+
+        bool RbTree::isRed(int key) {
+            return isRed(search(key).second);
+        }
+
     } // namespace rb_tree
 } // namespace data_structure
 
@@ -319,31 +400,39 @@ int main(int argc, char *argv[]) {
     rbt.put(3, "3");
     rbt.put(4, "4");
     rbt.put(5, "5");
-    /*       2
-     *      / \
-     *     1   4
-     *        / \
-     *       3   5
+    rbt.put(6, "6");
+    rbt.put(7, "7");
+    rbt.put(8, "8");
+    rbt.put(9, "9");
+    rbt.put(10, "10");
+    rbt.put(11, "11");
+    rbt.put(12, "12");
+    /*
+     *                [4]
+     *             /       \
+     *          [2]         8
+     *         /  \      /     \
+     *      [1]   [3]  [6]     [10]
+     *                /  \     /  \
+     *              [5]  [7] [9]  [11]
+     *                              \
+     *                               12
      */
-    cout << "depth(): " << rbt.depth() << endl;
-    cout << "remove(2): " << rbt.remove(2) << endl;
-    /*       4
-     *      / \
-     *     1   5
-     *      \
-     *       3
-     */
-    cout << "depth(): " << rbt.depth() << endl;
-    cout << "remove(4): " << rbt.remove(4) << endl;
-    /*       3
-     *      / \
-     *     1   5
-     */
-    cout << "depth(): " << rbt.depth() << endl;
-    cout << "remove(1): " << rbt.remove(1) << endl;
-    cout << "depth(): " << rbt.depth() << endl;
-    cout << "remove(5): " << rbt.remove(5) << endl;
-    cout << "depth(): " << rbt.depth() << endl;
-    cout << "remove(3): " << rbt.remove(3) << endl;
-    cout << "depth(): " << rbt.depth() << endl;
+    cout << "depth(): " << rbt.depth() << endl; // 5
+    cout << "isRed(1): " << rbt.isRed(1) << endl;   // 0
+    cout << "isRed(2): " << rbt.isRed(2) << endl;   // 0
+    cout << "isRed(3): " << rbt.isRed(3) << endl;   // 0
+    cout << "isRed(4): " << rbt.isRed(4) << endl;   // 0
+    cout << "isRed(5): " << rbt.isRed(5) << endl;   // 0
+    cout << "isRed(6): " << rbt.isRed(6) << endl;   // 0
+    cout << "isRed(7): " << rbt.isRed(7) << endl;   // 0
+    cout << "isRed(8): " << rbt.isRed(8) << endl;   // 1
+    cout << "isRed(9): " << rbt.isRed(9) << endl;   // 0
+    cout << "isRed(10): " << rbt.isRed(10) << endl; // 0
+    cout << "isRed(11): " << rbt.isRed(11) << endl; // 0
+    cout << "isRed(12): " << rbt.isRed(12) << endl; // 1
+    rbt.remove(12);
+    cout << "depth(): " << rbt.depth() << endl; // 4
+    rbt.remove(5);
+    cout << "depth(): " << rbt.depth() << endl; // 4
 }
