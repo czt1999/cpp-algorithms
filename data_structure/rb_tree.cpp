@@ -56,6 +56,12 @@ namespace data_structure {
 
             static void unlinkAndDelete(RbNode node);
 
+            static void copyKV(RbNode from, RbNode to);
+
+            static RbNode getMin(RbNode node);
+
+            static RbNode getMax(RbNode node);
+
             // 左旋（让右子节点替代原节点的位置）
             void rotateLeft(RbNode node);
 
@@ -63,14 +69,12 @@ namespace data_structure {
             void rotateRight(RbNode node);
 
             // 根据红黑树的特性调整
-            void adjust(RbNode node);
+            void adjustRed(RbNode node);
 
             // 移除指定节点
-            RbNode remove(RbNode node, int key);
+            void remove(RbNode node);
 
-            RbNode removeMin(RbNode node);
-
-            RbNode removeMax(RbNode node);
+            void adjustBlack(RbNode node);
 
         public:
             // 返回树的高度
@@ -130,7 +134,31 @@ namespace data_structure {
             }
         }
 
+        void RbTree::copyKV(RbNode from, RbNode to) {
+            if (from && to) {
+                to->key = from->key;
+                to->val = from->val;
+            }
+        }
+
+        RbNode RbTree::getMin(RbNode node) {
+            RbNode min = node;
+            if (min) {
+                while (min->left) min = min->left;
+            }
+            return min;
+        }
+
+        RbNode RbTree::getMax(RbNode node) {
+            RbNode max = node;
+            if (max) {
+                while (max->right) max = max->right;
+            }
+            return max;
+        }
+
         bool RbTree::isRed(RbNode node) {
+            // 叶子节点（空节点）是黑色
             return node && (RED == node->color);
         }
 
@@ -188,7 +216,7 @@ namespace data_structure {
                 par = tar;
                 tar = (tar->key < key) ? tar->right : tar->left;
             }
-            return pair(par, tar);
+            return pair{par, tar};
         }
 
         string RbTree::get(int key) {
@@ -218,7 +246,7 @@ namespace data_structure {
                         pointLeft(s.first, n);
                     }
                     // 作必要调整
-                    adjust(n);
+                    adjustRed(n);
                 }
             }
             return ret;
@@ -227,9 +255,7 @@ namespace data_structure {
         string RbTree::remove(int key) {
             pair<RbNode, RbNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
-            if (s.second) {
-                root = remove(root, key);
-            }
+            remove(s.second);
             return ret;
         }
 
@@ -254,11 +280,11 @@ namespace data_structure {
         // 
         // 下一步：adjust(y)...
         //
-        void RbTree::adjust(RbNode x) {
+        void RbTree::adjustRed(RbNode x) {
             // 黑节点无需再做调整
-            if (x && (RED == x->color)) {
+            if (isRed(x)) {
                 RbNode y = x->parent;
-                if (y && (RED == y->color)) {
+                if (isRed(y)) {
                     // y是红节点，则必存在父节点
                     RbNode z = y->parent;
                     if (z->left == y) {
@@ -280,7 +306,7 @@ namespace data_structure {
                     }
                     flipColor(x);
                     // 递归
-                    adjust(y);
+                    adjustRed(y);
                 } else if (!y) {
                     // 已是根节点
                     x->color = BLACK;
@@ -288,105 +314,91 @@ namespace data_structure {
             }
         }
 
-        RbNode RbTree::remove(RbNode node, int key) {
+        void RbTree::remove(RbNode node) {
             if (node) {
                 RbNode left = node->left, right = node->right, rpl;
-                if (node->key < key) {
-                    node = remove(left, key);
-                } else if (node->key > key) {
-                    node = remove(right, key);
-                } else { // node->key == key
-                    if (!left && !right) {
-                        if (RED == node->color) {
-                            unlinkAndDelete(node);
-                            return nullptr;
-                        } else { // 删除的是黑色叶子节点
-
-                        }
+                // 1. 原节点的左子树和右子树均为空
+                if (!left && !right) {
+                    RbNode parent = node->parent;
+                    // 1.1 删除的是根节点
+                    if (!parent) {
+                        root = nullptr;
+                        delete node;
+                        return;
                     }
-                    if (left) {
-                        // 原节点有左子树
-                        // 用左子树最右端的节点替代原节点
-                        for (rpl = left; rpl->right; rpl = rpl->right) {}
-                    } else {
-                        // 原节点有右子树
-                        // 用右子树最左端的节点替代原节点
-                        for (rpl = right; rpl->left; rpl = rpl->left) {}
+                    // 1.2 红节点直接删除
+                    if (isRed(node)) {
+                        unlinkAndDelete(node);
+                        return;
                     }
-                    node->key = rpl->key;
-                    node->val = rpl->val;
-                    if (left) {
-                        node->left = removeMax(left);
-                    } else {
-                        node->right = removeMin(right);
+                    bool is_left = (node == parent->left);
+                    RbNode sibling = (is_left ? parent->right : parent->left);
+                    // 1.3 黑节点且不是根节点
+                    //     必存在兄弟节点
+                    // 1.3.1 兄弟节点有子树
+                    if (sibling->left || sibling->right) {
+                        // 让父节点替代被删节点
+                        copyKV(parent, node);
+                        // 让兄弟节点所在子树的最小/最大节点替代父节点
+                        rpl = is_left ? getMin(sibling) : getMax(sibling);
+                        copyKV(rpl, parent);
+                        // 递归
+                        remove(rpl);
+                        return;
                     }
+                    // 1.3.2 兄弟节点无子树
+                    //       由于被删节点和兄弟节点的黑高相等
+                    //       兄弟节点必为黑色
+                    //       先让兄弟节点变红，让父节点（无论是什么颜色）变黑
+                    sibling->color = RED;
+                    int parent_old_color = parent->color;
+                    parent->color = BLACK;
+                    // 删除
+                    unlinkAndDelete(node);
+                    // a. 若父节点原先是红色，则经过变黑后平衡度不变，可以结束
+                    // b. 若父节点是黑色
+                    if (BLACK == parent_old_color) {
+                        adjustBlack(parent);
+                    }
+                    return;
                 }
+                if (left) {
+                    // 2. 原节点有左子树
+                    // 用左子树最大节点替代原节点
+                    rpl = getMax(left);
+                } else {
+                    // 3. 原节点有右子树
+                    // 用右子树最小节点替代原节点
+                    rpl = getMin(right);
+                }
+                // 把替代节点的key和val转移到原节点
+                // 节点的连接关系没有改变
+                copyKV(rpl, node);
+                // 递归，移除替代节点
+                remove(rpl);
             }
-            return node;
-
-//                RbNode left = node->left, right = node->right, rpl;
-//                // 1. 原节点的左子树和右子树均为空
-//                if (!left && !right) {
-//                    RbNode parent = node->parent;
-//                    // 1.1 删除的是根节点
-//                    if (!parent) {
-//                        root = nullptr;
-//                        delete node;
-//                        return;
-//                    }
-//                    // 1.2 红节点直接删除
-//                    if (RED == node->color) {
-//                        unlinkAndDelete(node);
-//                        return;
-//                    }
-//                    bool isLeft = (node == parent->left);
-//                    RbNode sibling = (isLeft ? parent->right : parent->left);
-//                    // 1.3 黑节点且不是根节点
-//                    //     必存在兄弟节点
-//                    if (RED == parent->color) {
-//                        // 1.3.1 父节点是红色
-//                        //       把父节点改为黑色，兄弟节点改为红色
-//                        parent->color = BLACK;
-//                        sibling->color = RED;
-//                        unlinkAndDelete(node);
-//                    } else {
-//                        // 1.3.2 父节点是黑色
-//                        //       需要旋转进行高度的调整
-//                        if (RED == sibling->color) {
-//
-//                        } else {
-//
-//                        }
-//                    }
-//                    return;
-//                }
-//                if (left) {
-//                    // 2. 原节点有左子树
-//                    // 用左子树最右端的节点替代原节点
-//                    for (rpl = left; rpl->right; rpl = rpl->right) {}
-//                } else {
-//                    // 3. 原节点有右子树
-//                    // 用右子树最左端的节点替代原节点
-//                    for (rpl = right; rpl->left; rpl = rpl->left) {}
-//                }
-//                // 把替代节点的key和val转移到原节点
-//                // 节点的连接关系没有改变
-//                node->key = rpl->key;
-//                node->val = rpl->val;
-//                // 递归，移除替代节点
-//                remove(rpl);
-        }
-
-        RbNode RbTree::removeMin(RbNode node) {
-            return nullptr;
-        }
-
-        RbNode RbTree::removeMax(RbNode node) {
-
         }
 
         bool RbTree::isRed(int key) {
             return isRed(search(key).second);
+        }
+
+        void RbTree::adjustBlack(RbNode node) {
+            if (!isRed(node)) {
+                if (RbNode parent = node->parent) {
+                    bool is_left = (node == parent->left);
+                    RbNode sibling = (is_left ? parent->right : parent->left);
+                    // 父节点是红色
+                    // 且兄弟节点的两个子节点都是黑色
+                    // 不需要再向上传递
+                    if (isRed(parent) && !isRed(sibling->left) && !isRed(sibling->right)) {
+
+
+                    } else {
+
+                    }
+                }
+            }
         }
 
     } // namespace rb_tree
