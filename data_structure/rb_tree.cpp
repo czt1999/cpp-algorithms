@@ -319,47 +319,16 @@ namespace data_structure {
                 RbNode left = node->left, right = node->right, rpl;
                 // 1. 原节点的左子树和右子树均为空
                 if (!left && !right) {
-                    RbNode parent = node->parent;
                     // 1.1 删除的是根节点
-                    if (!parent) {
+                    if (!node->parent) {
                         root = nullptr;
                         delete node;
                         return;
                     }
                     // 1.2 红节点直接删除
-                    if (isRed(node)) {
-                        unlinkAndDelete(node);
-                        return;
-                    }
-                    bool is_left = (node == parent->left);
-                    RbNode sibling = (is_left ? parent->right : parent->left);
-                    // 1.3 黑节点且不是根节点
-                    //     必存在兄弟节点
-                    // 1.3.1 兄弟节点有子树
-                    if (sibling->left || sibling->right) {
-                        // 让父节点替代被删节点
-                        copyKV(parent, node);
-                        // 让兄弟节点所在子树的最小/最大节点替代父节点
-                        rpl = is_left ? getMin(sibling) : getMax(sibling);
-                        copyKV(rpl, parent);
-                        // 递归
-                        remove(rpl);
-                        return;
-                    }
-                    // 1.3.2 兄弟节点无子树
-                    //       由于被删节点和兄弟节点的黑高相等
-                    //       兄弟节点必为黑色
-                    //       先让兄弟节点变红，让父节点（无论是什么颜色）变黑
-                    sibling->color = RED;
-                    int parent_old_color = parent->color;
-                    parent->color = BLACK;
-                    // 删除
+                    // 1.3 黑节点且不是根节点需进行调整
+                    adjustBlack(node);
                     unlinkAndDelete(node);
-                    // a. 若父节点原先是红色，则经过变黑后平衡度不变，可以结束
-                    // b. 若父节点是黑色
-                    if (BLACK == parent_old_color) {
-                        adjustBlack(parent);
-                    }
                     return;
                 }
                 if (left) {
@@ -384,20 +353,65 @@ namespace data_structure {
         }
 
         void RbTree::adjustBlack(RbNode node) {
-            if (!isRed(node)) {
-                if (RbNode parent = node->parent) {
-                    bool is_left = (node == parent->left);
-                    RbNode sibling = (is_left ? parent->right : parent->left);
-                    // 父节点是红色
-                    // 且兄弟节点的两个子节点都是黑色
-                    // 不需要再向上传递
-                    if (isRed(parent) && !isRed(sibling->left) && !isRed(sibling->right)) {
-
-
-                    } else {
-
-                    }
+            RbNode parent;
+            // 红节点或根节点无需调整
+            if (!isRed(node) && (parent = node->parent)) {
+                bool is_left = (node == parent->left);
+                RbNode sibling = (is_left ? parent->right : parent->left);
+                RbNode sl = sibling->left, sr = sibling->right;
+                // 1. 父节点是红色（兄弟节点是黑色）
+                //    且兄弟节点的两个子节点都是黑色
+                //    不需要再向上传递
+                if (isRed(parent) && !isRed(sl) && !isRed(sr)) {
+                    parent->color = BLACK;
+                    sibling->color = RED;
+                    return;
                 }
+                // 2. 兄弟节点、兄弟节点的子节点都是黑色
+                if (!isRed(sibling) && !isRed(sl) && !isRed(sr)) {
+                    sibling->color = RED;
+                    adjustBlack(parent);
+                    return;
+                }
+                // 3. 兄弟节点是黑色
+                //    且兄弟节点有至少一个红色子节点
+                if (!isRed(sibling) && (isRed(sl) || isRed(sr))) {
+                    if (is_left) {
+                        if (isRed(sl)) {
+                            // RL
+                            sl->color = parent->color;
+                            rotateRight(sibling);
+                        } else {
+                            // RR
+                            sr->color = sibling->color;
+                            sibling->color = parent->color;
+                        }
+                        parent->color = BLACK;
+                        rotateLeft(parent);
+                    } else {
+                        if (isRed(sl)) {
+                            // LL
+                            sl->color = sibling->color;
+                            sibling->color = parent->color;
+                        } else {
+                            // LR
+                            sr->color = parent->color;
+                            rotateLeft(sibling);
+                        }
+                        parent->color = BLACK;
+                        rotateRight(parent);
+                    }
+                    return;
+                }
+                // 4. 兄弟节点是红色
+                parent->color = RED;
+                sibling->color = BLACK;
+                if (is_left) {
+                    rotateLeft(parent);
+                } else {
+                    rotateRight(parent);
+                }
+                adjustBlack(node);
             }
         }
 
