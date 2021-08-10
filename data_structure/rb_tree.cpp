@@ -68,9 +68,10 @@ namespace data_structure {
             // 移除指定节点
             void remove(RbNode node);
 
-            // 根据红黑树的特性调整
+            // 当出现连续的红节点时调整
             void adjustRed(RbNode node);
 
+            // 当出现黑色节点数目不匹配时调整
             void adjustBlack(RbNode node);
 
         public:
@@ -90,7 +91,7 @@ namespace data_structure {
         };
 
         //
-        // ~~~~~~~~~~~~ Implements for treeree ~~~~~~~~~~~~
+        // ~~~~~~~~~~~~ Implements for RbTree ~~~~~~~~~~~~
         //
 
         int RbTree::depth(RbNode node) {
