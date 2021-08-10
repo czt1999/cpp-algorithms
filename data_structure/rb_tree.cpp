@@ -32,7 +32,7 @@ namespace data_structure {
         // 4. 红节点要么有两个叶子节点，要么有两个黑色的非叶子节点
         // 5. 任一节点到其每个叶子的路径都包含相同数目的黑节点
         //
-        class treeree {
+        class RbTree {
         private:
             // 根节点
             RbNode root;
@@ -44,9 +44,6 @@ namespace data_structure {
             pair<RbNode, RbNode> search(int key);
 
             static bool isRed(RbNode node);
-
-            // 改变指定节点的颜色
-            static void flipColor(RbNode node);
 
             // 因每次修改节点关系都涉及到*parent
             // 故将这部分操作封装成两个工具性函数
@@ -68,11 +65,11 @@ namespace data_structure {
             // 右旋（让左子节点替代原节点的位置）
             void rotateRight(RbNode node);
 
-            // 根据红黑树的特性调整
-            void adjustRed(RbNode node);
-
             // 移除指定节点
             void remove(RbNode node);
+
+            // 根据红黑树的特性调整
+            void adjustRed(RbNode node);
 
             void adjustBlack(RbNode node);
 
@@ -96,15 +93,15 @@ namespace data_structure {
         // ~~~~~~~~~~~~ Implements for treeree ~~~~~~~~~~~~
         //
 
-        int treeree::depth(RbNode node) {
+        int RbTree::depth(RbNode node) {
             return node ? max(depth(node->left), depth(node->right)) + 1 : 0;
         }
 
-        int treeree::depth() {
+        int RbTree::depth() {
             return depth(root);
         }
 
-        void treeree::pointLeft(RbNode parent, RbNode child) {
+        void RbTree::pointLeft(RbNode parent, RbNode child) {
             if (parent) {
                 parent->left = child;
                 if (child) {
@@ -113,7 +110,7 @@ namespace data_structure {
             }
         }
 
-        void treeree::pointRight(RbNode parent, RbNode child) {
+        void RbTree::pointRight(RbNode parent, RbNode child) {
             if (parent) {
                 parent->right = child;
                 if (child) {
@@ -122,7 +119,7 @@ namespace data_structure {
             }
         }
 
-        void treeree::unlinkAndDelete(RbNode node) {
+        void RbTree::unlinkAndDelete(RbNode node) {
             if (node) {
                 RbNode parent = node->parent;
                 if (parent && node == parent->left) {
@@ -134,14 +131,14 @@ namespace data_structure {
             }
         }
 
-        void treeree::copyKV(RbNode from, RbNode to) {
+        void RbTree::copyKV(RbNode from, RbNode to) {
             if (from && to) {
                 to->key = from->key;
                 to->val = from->val;
             }
         }
 
-        RbNode treeree::getMin(RbNode node) {
+        RbNode RbTree::getMin(RbNode node) {
             RbNode min = node;
             if (min) {
                 while (min->left) min = min->left;
@@ -149,7 +146,7 @@ namespace data_structure {
             return min;
         }
 
-        RbNode treeree::getMax(RbNode node) {
+        RbNode RbTree::getMax(RbNode node) {
             RbNode max = node;
             if (max) {
                 while (max->right) max = max->right;
@@ -157,15 +154,13 @@ namespace data_structure {
             return max;
         }
 
-        bool treeree::isRed(RbNode node) {
-            // 叶子节点（空节点）是黑色
-            return node && (RED == node->color);
+        bool RbTree::isRed(int key) {
+            return isRed(search(key).second);
         }
 
-        void treeree::flipColor(RbNode node) {
-            if (node) {
-                node->color = (RED == node->color) ? BLACK : RED;
-            }
+        bool RbTree::isRed(RbNode node) {
+            // 叶子节点（空节点）是黑色
+            return node && (RED == node->color);
         }
 
         //
@@ -173,7 +168,7 @@ namespace data_structure {
         //    \     =>    /
         //     y         x
         //
-        void treeree::rotateLeft(RbNode x) {
+        void RbTree::rotateLeft(RbNode x) {
             RbNode y = x->right, p = x->parent;
             pointRight(x, y->left);
             pointLeft(y, x);
@@ -194,7 +189,7 @@ namespace data_structure {
         //    /     =>    \
         //   y             x
         //
-        void treeree::rotateRight(RbNode x) {
+        void RbTree::rotateRight(RbNode x) {
             RbNode y = x->left, p = x->parent;
             pointLeft(x, y->right);
             pointRight(y, x);
@@ -210,7 +205,7 @@ namespace data_structure {
             }
         }
 
-        pair<RbNode, RbNode> treeree::search(int key) {
+        pair<RbNode, RbNode> RbTree::search(int key) {
             RbNode par = nullptr, tar = root;
             while (tar && tar->key != key) {
                 par = tar;
@@ -219,12 +214,12 @@ namespace data_structure {
             return pair{par, tar};
         }
 
-        string treeree::get(int key) {
+        string RbTree::get(int key) {
             pair<RbNode, RbNode> s = search(key);
             return s.second ? s.second->val : "";
         }
 
-        string treeree::put(int key, const string &val) {
+        string RbTree::put(int key, const string &val) {
             pair<RbNode, RbNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             if (s.second) {
@@ -252,69 +247,14 @@ namespace data_structure {
             return ret;
         }
 
-        string treeree::remove(int key) {
+        string RbTree::remove(int key) {
             pair<RbNode, RbNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             remove(s.second);
             return ret;
         }
 
-        //
-        // []表示黑节点，有4种情况需要调整：
-        //   1:          2:          3:        4:
-        //        [z]       [z]        [z]       [z]
-        //        /         /            \         \
-        //       y         y              y         y
-        //      /           \            /           \
-        //     x             x          x             x
-        //
-        // 2对y右旋可得到1，3对y左旋可得到4（同tree）
-        // 1对z左旋，再变换y和z的颜色
-        // 4对z右旋，再变换y和z的颜色
-        // 结果形如：
-        //            [y]       变换颜色         y
-        //          /     \    =========>     /    \
-        //        x(z)   z(x)             [x(z)]  [z(x)]
-        //
-        // （这几次变色操作等价于只对1和4中的x作一次变色）
-        // 
-        // 下一步：adjust(y)...
-        //
-        void treeree::adjustRed(RbNode x) {
-            // 黑节点无需再做调整
-            if (isRed(x)) {
-                RbNode y = x->parent;
-                if (isRed(y)) {
-                    // y是红节点，则必存在父节点
-                    RbNode z = y->parent;
-                    if (z->left == y) {
-                        if (y->right == x) {
-                            // 2: 
-                            rotateLeft(y);
-                            swap(x, y);
-                        }
-                        // 1:
-                        rotateRight(z);
-                    } else {
-                        if (y->left == x) {
-                            // 3:
-                            rotateRight(y);
-                            swap(x, y);
-                        }
-                        // 4:
-                        rotateLeft(z);
-                    }
-                    flipColor(x);
-                    // 递归
-                    adjustRed(y);
-                } else if (!y) {
-                    // 已是根节点
-                    x->color = BLACK;
-                }
-            }
-        }
-
-        void treeree::remove(RbNode node) {
+        void RbTree::remove(RbNode node) {
             if (node) {
                 RbNode left = node->left, right = node->right, rpl;
                 // 1. 原节点的左子树和右子树均为空
@@ -348,41 +288,98 @@ namespace data_structure {
             }
         }
 
-        bool treeree::isRed(int key) {
-            return isRed(search(key).second);
+        //
+        // []表示黑节点，有4种情况需要调整：
+        //   1:          2:          3:        4:
+        //        [z]       [z]        [z]       [z]
+        //        /         /            \         \
+        //       y         y              y         y
+        //      /           \            /           \
+        //     x             x          x             x
+        //
+        // 2对y右旋可得到1，3对y左旋可得到4（同tree）
+        // 1对z左旋，再变换y和z的颜色
+        // 4对z右旋，再变换y和z的颜色
+        // 结果形如：
+        //            [y]       变换颜色         y
+        //          /     \    =========>     /    \
+        //        x(z)   z(x)             [x(z)]  [z(x)]
+        //
+        // （这几次变色操作等价于只对1和4中的x作一次变色）
+        // 
+        // 下一步：adjust(y)...
+        //
+        void RbTree::adjustRed(RbNode x) {
+            // 黑节点无需再做调整
+            if (isRed(x)) {
+                RbNode y = x->parent;
+                if (isRed(y)) {
+                    // y是红节点，则必存在父节点
+                    RbNode z = y->parent;
+                    if (z->left == y) {
+                        if (y->right == x) {
+                            // 2: 
+                            rotateLeft(y);
+                            swap(x, y);
+                        }
+                        // 1:
+                        rotateRight(z);
+                    } else {
+                        if (y->left == x) {
+                            // 3:
+                            rotateRight(y);
+                            swap(x, y);
+                        }
+                        // 4:
+                        rotateLeft(z);
+                    }
+                    x->color = BLACK;
+                    // 递归
+                    adjustRed(y);
+                } else if (!y) {
+                    // 已是根节点
+                    x->color = BLACK;
+                }
+            }
         }
 
-        void treeree::adjustBlack(RbNode node) {
-            RbNode parent;
+        //
+        // p : 父节点
+        // s : 兄弟节点
+        // sl: s的左节点
+        // sr: s的右节点
+        //
+        void RbTree::adjustBlack(RbNode node) {
+            RbNode p;
             // 红节点或根节点无需调整
-            if (!isRed(node) && (parent = node->parent)) {
-                bool is_left = (node == parent->left);
-                RbNode sibling = (is_left ? parent->right : parent->left);
-                RbNode sl = sibling->left, sr = sibling->right;
+            if (!isRed(node) && (p = node->parent)) {
+                bool is_left = (node == p->left);
+                RbNode s = (is_left ? p->right : p->left);
+                RbNode sl = s->left, sr = s->right;
                 // 1. 父节点是红色（兄弟节点是黑色）
                 //    且兄弟节点的两个子节点都是黑色
                 //    不需要再向上传递
-                if (isRed(parent) && !isRed(sl) && !isRed(sr)) {
-                    parent->color = BLACK;
-                    sibling->color = RED;
+                if (isRed(p) && !isRed(sl) && !isRed(sr)) {
+                    p->color = BLACK;
+                    s->color = RED;
                     return;
                 }
                 // 2. 兄弟节点是红色
-                if (isRed(sibling)) {
-                    parent->color = RED;
-                    sibling->color = BLACK;
+                if (isRed(s)) {
+                    p->color = RED;
+                    s->color = BLACK;
                     if (is_left) {
-                        rotateLeft(parent);
+                        rotateLeft(p);
                     } else {
-                        rotateRight(parent);
+                        rotateRight(p);
                     }
                     adjustBlack(node);
                     return;
                 }
                 // 3. 兄弟节点、兄弟节点的子节点都是黑色
                 if (!isRed(sl) && !isRed(sr)) {
-                    sibling->color = RED;
-                    adjustBlack(parent);
+                    s->color = RED;
+                    adjustBlack(p);
                     return;
                 }
                 // 4. 兄弟节点是黑色
@@ -390,27 +387,27 @@ namespace data_structure {
                 if (is_left) {
                     if (isRed(sl)) {
                         // RL
-                        sl->color = parent->color;
-                        rotateRight(sibling);
+                        sl->color = p->color;
+                        rotateRight(s);
                     } else { // isRed(sr)
                         // RR
-                        sr->color = sibling->color;
-                        sibling->color = parent->color;
+                        sr->color = s->color;
+                        s->color = p->color;
                     }
-                    parent->color = BLACK;
-                    rotateLeft(parent);
+                    p->color = BLACK;
+                    rotateLeft(p);
                 } else {
                     if (isRed(sl)) {
                         // LL
-                        sl->color = sibling->color;
-                        sibling->color = parent->color;
+                        sl->color = s->color;
+                        s->color = p->color;
                     } else { // isRed(sr)
                         // LR
-                        sr->color = parent->color;
-                        rotateLeft(sibling);
+                        sr->color = p->color;
+                        rotateLeft(s);
                     }
-                    parent->color = BLACK;
-                    rotateRight(parent);
+                    p->color = BLACK;
+                    rotateRight(p);
                 }
             }
         }
@@ -419,7 +416,7 @@ namespace data_structure {
 } // namespace data_structure
 
 int main(int argc, char *argv[]) {
-    data_structure::rb_tree::treeree tree{};
+    data_structure::rb_tree::RbTree tree{};
     cout << "======= Order 1 ========" << endl;
     tree.put(1, "1");
     tree.put(2, "2");
