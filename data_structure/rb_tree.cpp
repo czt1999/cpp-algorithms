@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-#define RED 0
-#define BLACK 1
+#define RED 1
+#define BLACK 0
 
 using namespace std;
 
@@ -23,7 +23,7 @@ namespace data_structure {
         } *RbNode;
 
         //
-        // 红黑树是一种特化的rbt，一样可以在查询时实现
+        // 红黑树是一种特化的tree，一样可以在查询时实现
         // O(logN) 的时间复杂度，但进行平衡的代价更低
         // 红黑树有以下限制：
         // 1. 节点是红色或黑色
@@ -32,7 +32,7 @@ namespace data_structure {
         // 4. 红节点要么有两个叶子节点，要么有两个黑色的非叶子节点
         // 5. 任一节点到其每个叶子的路径都包含相同数目的黑节点
         //
-        class RbTree {
+        class treeree {
         private:
             // 根节点
             RbNode root;
@@ -93,18 +93,18 @@ namespace data_structure {
         };
 
         //
-        // ~~~~~~~~~~~~ Implements for RbTree ~~~~~~~~~~~~
+        // ~~~~~~~~~~~~ Implements for treeree ~~~~~~~~~~~~
         //
 
-        int RbTree::depth(RbNode node) {
+        int treeree::depth(RbNode node) {
             return node ? max(depth(node->left), depth(node->right)) + 1 : 0;
         }
 
-        int RbTree::depth() {
+        int treeree::depth() {
             return depth(root);
         }
 
-        void RbTree::pointLeft(RbNode parent, RbNode child) {
+        void treeree::pointLeft(RbNode parent, RbNode child) {
             if (parent) {
                 parent->left = child;
                 if (child) {
@@ -113,7 +113,7 @@ namespace data_structure {
             }
         }
 
-        void RbTree::pointRight(RbNode parent, RbNode child) {
+        void treeree::pointRight(RbNode parent, RbNode child) {
             if (parent) {
                 parent->right = child;
                 if (child) {
@@ -122,7 +122,7 @@ namespace data_structure {
             }
         }
 
-        void RbTree::unlinkAndDelete(RbNode node) {
+        void treeree::unlinkAndDelete(RbNode node) {
             if (node) {
                 RbNode parent = node->parent;
                 if (parent && node == parent->left) {
@@ -134,14 +134,14 @@ namespace data_structure {
             }
         }
 
-        void RbTree::copyKV(RbNode from, RbNode to) {
+        void treeree::copyKV(RbNode from, RbNode to) {
             if (from && to) {
                 to->key = from->key;
                 to->val = from->val;
             }
         }
 
-        RbNode RbTree::getMin(RbNode node) {
+        RbNode treeree::getMin(RbNode node) {
             RbNode min = node;
             if (min) {
                 while (min->left) min = min->left;
@@ -149,7 +149,7 @@ namespace data_structure {
             return min;
         }
 
-        RbNode RbTree::getMax(RbNode node) {
+        RbNode treeree::getMax(RbNode node) {
             RbNode max = node;
             if (max) {
                 while (max->right) max = max->right;
@@ -157,12 +157,12 @@ namespace data_structure {
             return max;
         }
 
-        bool RbTree::isRed(RbNode node) {
+        bool treeree::isRed(RbNode node) {
             // 叶子节点（空节点）是黑色
             return node && (RED == node->color);
         }
 
-        void RbTree::flipColor(RbNode node) {
+        void treeree::flipColor(RbNode node) {
             if (node) {
                 node->color = (RED == node->color) ? BLACK : RED;
             }
@@ -173,7 +173,7 @@ namespace data_structure {
         //    \     =>    /
         //     y         x
         //
-        void RbTree::rotateLeft(RbNode x) {
+        void treeree::rotateLeft(RbNode x) {
             RbNode y = x->right, p = x->parent;
             pointRight(x, y->left);
             pointLeft(y, x);
@@ -194,7 +194,7 @@ namespace data_structure {
         //    /     =>    \
         //   y             x
         //
-        void RbTree::rotateRight(RbNode x) {
+        void treeree::rotateRight(RbNode x) {
             RbNode y = x->left, p = x->parent;
             pointLeft(x, y->right);
             pointRight(y, x);
@@ -210,7 +210,7 @@ namespace data_structure {
             }
         }
 
-        pair<RbNode, RbNode> RbTree::search(int key) {
+        pair<RbNode, RbNode> treeree::search(int key) {
             RbNode par = nullptr, tar = root;
             while (tar && tar->key != key) {
                 par = tar;
@@ -219,12 +219,12 @@ namespace data_structure {
             return pair{par, tar};
         }
 
-        string RbTree::get(int key) {
+        string treeree::get(int key) {
             pair<RbNode, RbNode> s = search(key);
             return s.second ? s.second->val : "";
         }
 
-        string RbTree::put(int key, const string &val) {
+        string treeree::put(int key, const string &val) {
             pair<RbNode, RbNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             if (s.second) {
@@ -252,7 +252,7 @@ namespace data_structure {
             return ret;
         }
 
-        string RbTree::remove(int key) {
+        string treeree::remove(int key) {
             pair<RbNode, RbNode> s = search(key);
             auto ret = s.second ? s.second->val : "";
             remove(s.second);
@@ -268,7 +268,7 @@ namespace data_structure {
         //      /           \            /           \
         //     x             x          x             x
         //
-        // 2对y右旋可得到1，3对y左旋可得到4（同rbt）
+        // 2对y右旋可得到1，3对y左旋可得到4（同tree）
         // 1对z左旋，再变换y和z的颜色
         // 4对z右旋，再变换y和z的颜色
         // 结果形如：
@@ -280,7 +280,7 @@ namespace data_structure {
         // 
         // 下一步：adjust(y)...
         //
-        void RbTree::adjustRed(RbNode x) {
+        void treeree::adjustRed(RbNode x) {
             // 黑节点无需再做调整
             if (isRed(x)) {
                 RbNode y = x->parent;
@@ -314,7 +314,7 @@ namespace data_structure {
             }
         }
 
-        void RbTree::remove(RbNode node) {
+        void treeree::remove(RbNode node) {
             if (node) {
                 RbNode left = node->left, right = node->right, rpl;
                 // 1. 原节点的左子树和右子树均为空
@@ -348,11 +348,11 @@ namespace data_structure {
             }
         }
 
-        bool RbTree::isRed(int key) {
+        bool treeree::isRed(int key) {
             return isRed(search(key).second);
         }
 
-        void RbTree::adjustBlack(RbNode node) {
+        void treeree::adjustBlack(RbNode node) {
             RbNode parent;
             // 红节点或根节点无需调整
             if (!isRed(node) && (parent = node->parent)) {
@@ -367,51 +367,51 @@ namespace data_structure {
                     sibling->color = RED;
                     return;
                 }
-                // 2. 兄弟节点、兄弟节点的子节点都是黑色
-                if (!isRed(sibling) && !isRed(sl) && !isRed(sr)) {
+                // 2. 兄弟节点是红色
+                if (isRed(sibling)) {
+                    parent->color = RED;
+                    sibling->color = BLACK;
+                    if (is_left) {
+                        rotateLeft(parent);
+                    } else {
+                        rotateRight(parent);
+                    }
+                    adjustBlack(node);
+                    return;
+                }
+                // 3. 兄弟节点、兄弟节点的子节点都是黑色
+                if (!isRed(sl) && !isRed(sr)) {
                     sibling->color = RED;
                     adjustBlack(parent);
                     return;
                 }
-                // 3. 兄弟节点是黑色
+                // 4. 兄弟节点是黑色
                 //    且兄弟节点有至少一个红色子节点
-                if (!isRed(sibling) && (isRed(sl) || isRed(sr))) {
-                    if (is_left) {
-                        if (isRed(sl)) {
-                            // RL
-                            sl->color = parent->color;
-                            rotateRight(sibling);
-                        } else {
-                            // RR
-                            sr->color = sibling->color;
-                            sibling->color = parent->color;
-                        }
-                        parent->color = BLACK;
-                        rotateLeft(parent);
-                    } else {
-                        if (isRed(sl)) {
-                            // LL
-                            sl->color = sibling->color;
-                            sibling->color = parent->color;
-                        } else {
-                            // LR
-                            sr->color = parent->color;
-                            rotateLeft(sibling);
-                        }
-                        parent->color = BLACK;
-                        rotateRight(parent);
-                    }
-                    return;
-                }
-                // 4. 兄弟节点是红色
-                parent->color = RED;
-                sibling->color = BLACK;
                 if (is_left) {
+                    if (isRed(sl)) {
+                        // RL
+                        sl->color = parent->color;
+                        rotateRight(sibling);
+                    } else { // isRed(sr)
+                        // RR
+                        sr->color = sibling->color;
+                        sibling->color = parent->color;
+                    }
+                    parent->color = BLACK;
                     rotateLeft(parent);
                 } else {
+                    if (isRed(sl)) {
+                        // LL
+                        sl->color = sibling->color;
+                        sibling->color = parent->color;
+                    } else { // isRed(sr)
+                        // LR
+                        sr->color = parent->color;
+                        rotateLeft(sibling);
+                    }
+                    parent->color = BLACK;
                     rotateRight(parent);
                 }
-                adjustBlack(node);
             }
         }
 
@@ -419,21 +419,22 @@ namespace data_structure {
 } // namespace data_structure
 
 int main(int argc, char *argv[]) {
-    data_structure::rb_tree::RbTree rbt{};
+    data_structure::rb_tree::treeree tree{};
     cout << "======= Order 1 ========" << endl;
-    rbt.put(1, "1");
-    rbt.put(2, "2");
-    rbt.put(3, "3");
-    rbt.put(4, "4");
-    rbt.put(5, "5");
-    rbt.put(6, "6");
-    rbt.put(7, "7");
-    rbt.put(8, "8");
-    rbt.put(9, "9");
-    rbt.put(10, "10");
-    rbt.put(11, "11");
-    rbt.put(12, "12");
-    /*
+    tree.put(1, "1");
+    tree.put(2, "2");
+    tree.put(3, "3");
+    tree.put(4, "4");
+    tree.put(5, "5");
+    tree.put(6, "6");
+    tree.put(7, "7");
+    tree.put(8, "8");
+    tree.put(9, "9");
+    tree.put(10, "10");
+    tree.put(11, "11");
+    tree.put(12, "12");
+    /* []: black
+     *
      *                [4]
      *             /       \
      *          [2]         8
@@ -444,21 +445,56 @@ int main(int argc, char *argv[]) {
      *                              \
      *                               12
      */
-    cout << "depth(): " << rbt.depth() << endl; // 5
-    cout << "isRed(1): " << rbt.isRed(1) << endl;   // 0
-    cout << "isRed(2): " << rbt.isRed(2) << endl;   // 0
-    cout << "isRed(3): " << rbt.isRed(3) << endl;   // 0
-    cout << "isRed(4): " << rbt.isRed(4) << endl;   // 0
-    cout << "isRed(5): " << rbt.isRed(5) << endl;   // 0
-    cout << "isRed(6): " << rbt.isRed(6) << endl;   // 0
-    cout << "isRed(7): " << rbt.isRed(7) << endl;   // 0
-    cout << "isRed(8): " << rbt.isRed(8) << endl;   // 1
-    cout << "isRed(9): " << rbt.isRed(9) << endl;   // 0
-    cout << "isRed(10): " << rbt.isRed(10) << endl; // 0
-    cout << "isRed(11): " << rbt.isRed(11) << endl; // 0
-    cout << "isRed(12): " << rbt.isRed(12) << endl; // 1
-    rbt.remove(12);
-    cout << "depth(): " << rbt.depth() << endl; // 4
-    rbt.remove(5);
-    cout << "depth(): " << rbt.depth() << endl; // 4
+    cout << "depth(): " << tree.depth() << endl; // 5
+    cout << "isRed(1): " << tree.isRed(1) << endl;   // 0
+    cout << "isRed(2): " << tree.isRed(2) << endl;   // 0
+    cout << "isRed(3): " << tree.isRed(3) << endl;   // 0
+    cout << "isRed(4): " << tree.isRed(4) << endl;   // 0
+    cout << "isRed(5): " << tree.isRed(5) << endl;   // 0
+    cout << "isRed(6): " << tree.isRed(6) << endl;   // 0
+    cout << "isRed(7): " << tree.isRed(7) << endl;   // 0
+    cout << "isRed(8): " << tree.isRed(8) << endl;   // 1
+    cout << "isRed(9): " << tree.isRed(9) << endl;   // 0
+    cout << "isRed(10): " << tree.isRed(10) << endl; // 0
+    cout << "isRed(11): " << tree.isRed(11) << endl; // 0
+    cout << "isRed(12): " << tree.isRed(12) << endl; // 1
+    tree.remove(5);
+    /*
+     *                [4]
+     *             /       \
+     *          [2]        [8]
+     *         /  \      /     \
+     *      [1]   [3]  [6]      10
+     *                   \     /  \
+     *                    7 [9]  [11]
+     *                              \
+     *                               12
+     */
+    cout << "isRed(7): " << tree.isRed(7) << endl;   // 1
+    cout << "isRed(8): " << tree.isRed(8) << endl;   // 0
+    cout << "isRed(10): " << tree.isRed(10) << endl; // 1
+    tree.remove(3);
+    /*
+     *                [8]
+     *             /       \
+     *          [4]        [10]
+     *         /  \      /     \
+     *       [2]  [6]  [9]     [11]
+     *      /        \            \
+     *     1          7            12
+     */
+    cout << "isRed(1): " << tree.isRed(1) << endl;   // 1
+    cout << "isRed(10): " << tree.isRed(10) << endl; // 0
+    cout << "depth(): " << tree.depth() << endl; // 4
+    tree.remove(8);
+    /*
+     *                [7]
+     *             /       \
+     *          [4]        [10]
+     *         /  \      /     \
+     *      [2]   [6]  [9]     [11]
+     *     /                      \
+     *    1                        12
+     */
+    cout << "isRed(7): " << tree.isRed(7) << endl;   // 0
 }
