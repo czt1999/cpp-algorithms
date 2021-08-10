@@ -98,7 +98,7 @@ namespace data_structure {
 
         void Trie::findWord(TNode node, const string &prefix, vector<string> &acc) {
             if (node) {
-                if (node->word && node->ch) {
+                if (node->word) {
                     acc.push_back(prefix);
                 }
                 for (int i = 0; i < MAX_CHILDREN; ++i) {
@@ -129,8 +129,10 @@ int main(int argc, char *argv[]) {
     trie.add("and");
     trie.add("about");
     trie.add("alibaba");
+    trie.add("again");
+    trie.add("agent");
     vector<string> v = trie.findWordByPrefix("a");
-//    vector<string> v = trie.findWordByPrefix("an");
+//    vector<string> v = trie.findWordByPrefix("ag");
     for (const auto &s : v) {
         cout << s << endl;
     }
