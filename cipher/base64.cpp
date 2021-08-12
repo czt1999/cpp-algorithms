@@ -10,30 +10,31 @@ namespace cipher {
 
     namespace base64 {
 
-        const char characters[64] = {
+        const char characters[65] = {
                 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
                 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+                'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
+                '='
         };
 
         string handleBlock(byte *b, int n) {
-            char *ch = new char[5];
-            ch[0] = characters[(int) (b[0] >> 2)];
-            if (1 < n) {
-                ch[1] = characters[(int) (b[0] << 6 >> 2) + (int) (b[1] >> 4)];
-            } else {
-                ch[1] = characters[(int) (b[0] << 6 >> 2)];
-                ch[2] = ch[3] = '=';
+            int indices[4] = {64, 64, 64, 64};
+            // 计算索引
+            indices[0] = (int) (b[0] >> 2);
+            indices[1] = (int) (b[0] << 6 >> 2);
+            if (n > 1) {
+                indices[1] += (int) (b[1] >> 4);
+                indices[2] = (int) (b[1] << 4 >> 2);
+                if (n == 3) {
+                    indices[2] += (int) (b[2] >> 6);
+                    indices[3] = (int) (b[2] << 2 >> 2);
+                }
             }
-            if (3 == n) {
-                ch[2] = characters[(int) (b[1] << 4 >> 2) + (int) (b[2] >> 6)];
-                ch[3] = characters[(int) (b[2] << 2 >> 2)];
-            } else {
-                ch[2] = characters[(int) (b[1] << 4 >> 2)];
-                ch[3] = '=';
+            char ch[5];
+            for (int i = 0; i < 4; ++i) {
+                ch[i] = characters[indices[i]];
             }
-            ch[4] = 0;
             return {ch};
         }
 
@@ -48,7 +49,6 @@ namespace cipher {
                 }
                 memcpy(block, (bytes + i), n);
                 enc += handleBlock(block, n);
-                cout << i << ": " << enc << endl;
             }
             return enc;
         }
@@ -60,5 +60,5 @@ namespace cipher {
 }
 
 int main(int argc, char *argv[]) {
-    cout << cipher::base64::encode("pleasure.") << endl;
+    cout << cipher::base64::encode("leasure.") << endl;
 }
