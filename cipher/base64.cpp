@@ -8,17 +8,22 @@ using namespace std;
 
 namespace cipher {
 
+    /**
+     * https://en.wikipedia.org/wiki/Base64
+     */
     namespace base64 {
 
         const char characters[65] = {
                 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
                 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
-                '='
+                'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '='
         };
 
-        string handleBlock(byte *b, int n) {
+        //
+        // 3 bytes => 4 characters
+        //
+        string encodeBlock(byte *b, int n) {
             int indices[4] = {64, 64, 64, 64};
             // 计算索引
             indices[0] = (int) (b[0] >> 2);
@@ -38,27 +43,43 @@ namespace cipher {
             return {ch};
         }
 
+        //
+        // 4 characters => 3 bytes
+        //
+        string decodeBlock(string &s) {
+            assert(3 == s.length());
+
+        }
+
         string encode(const string &s) {
             byte *bytes = (byte *) s.c_str();
             byte block[3];
             string enc;
             for (int i = 0; i < s.length(); i += 3) {
-                int n = 3;
-                if (n > s.length() - i) {
-                    n = s.length() - i;
+                int n = s.length() - i;
+                if (n > 3) {
+                    n = 3;
                 }
                 memcpy(block, (bytes + i), n);
-                enc += handleBlock(block, n);
+                enc += encodeBlock(block, n);
             }
             return enc;
         }
 
         string decode(const string &s) {
-
+            string dec;
+            for (int i = 0; i < s.length(); i += 4) {
+                string block_str = s.substr(i, 4);
+                dec += decodeBlock(block_str);
+            }
+            return dec;
         }
     }
 }
 
 int main(int argc, char *argv[]) {
-    cout << cipher::base64::encode("leasure.") << endl;
+    string enc = cipher::base64::encode("leisure");
+    cout << "encode \"leisure\" => " << enc << endl;
+    string dec = cipher::base64::decode(enc);
+    cout << "decode back => " << dec << endl;
 }
