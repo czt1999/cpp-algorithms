@@ -20,8 +20,27 @@ namespace cipher {
                 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '='
         };
 
+        int indexOf(char c) {
+            if (c >= 'A' && c <= 'Z') {
+                return c - 'A';
+            }
+            if (c >= 'a' && c <= 'z') {
+                return c - 'a' + 26;
+            }
+            if (c >= '0' && c <= '9') {
+                return c - '0' + 52;
+            }
+            if (c == '+') {
+                return 62;
+            }
+            if (c == '/') {
+                return 63;
+            }
+            return c == '=' ? 64 : -1;
+        }
+
         //
-        // 3 bytes => 4 characters
+        // 1/2/3 bytes => 4 characters
         //
         string encodeBlock(byte *b, int n) {
             int indices[4] = {64, 64, 64, 64};
@@ -44,11 +63,26 @@ namespace cipher {
         }
 
         //
-        // 4 characters => 3 bytes
+        // 4 characters => 1/2/3 bytes
         //
         string decodeBlock(string &s) {
-            assert(3 == s.length());
-
+            assert(4 == s.length());
+            // 查找对应索引
+            int indices[4] = {indexOf(s[0]), indexOf(s[1]),
+                              indexOf(s[2]), indexOf(s[3])};
+            int n = indices[3] == 64 ? (indices[2] == 64 ? 1 : 2) : 3;
+            // 反推原始字节
+            char bt[3];
+            bt[0] = (indices[0] << 2) + (indices[1] >> 4);
+            if (n == 1) {
+                return {bt[0]};
+            }
+            bt[1] = (indices[1] << 4) + (indices[2] >> 2);
+            if (n == 2) {
+                return {bt[0], bt[1]};
+            }
+            bt[2] = (indices[2] << 6) + indices[3];
+            return {bt[0], bt[1], bt[2]};
         }
 
         string encode(const string &s) {
@@ -78,8 +112,9 @@ namespace cipher {
 }
 
 int main(int argc, char *argv[]) {
-    string enc = cipher::base64::encode("leisure");
-    cout << "encode \"leisure\" => " << enc << endl;
+    string s = "Hello, my love.";
+    string enc = cipher::base64::encode(s);
+    cout << "encode \"" << s << "\" => " << enc << endl;
     string dec = cipher::base64::decode(enc);
-    cout << "decode back => " << dec << endl;
+    cout << "decode \"" << enc << "\" => " << dec << endl;
 }
