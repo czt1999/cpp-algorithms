@@ -15,8 +15,8 @@ namespace data_structure {
         typedef struct Node {
             int key;
             string val;
-            struct Node *left;
-            struct Node *right;
+            Node *left;
+            Node *right;
         } *BiNode;
 
         /**
